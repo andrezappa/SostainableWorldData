@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS globalSustainableEnergyData (
     lowCarbonElectricity DECIMAL(5, 2),         		-- % of electricity from low-carbon sources
     energyConsumption DECIMAL(8, 2),            		-- Energy consumption per capita (kWh/person)
     energyIntensity DECIMAL(4, 2),              		-- Energy use per unit of GDP at purchasing power parity (MJ/$2017 PPP GDP)
-    co2Emissions DECIMAL(10, 2),                 		-- Carbon dioxide emissions per person in metric tons
+    co2Emissions DECIMAL(10, 2),                 		-- Carbon dioxide emissions in metric tons
     renewablesEquivalentPrimaryEnergy DECIMAL(5, 2), 	-- Renewables as % of equivalent primary energy
     gdpGrowth DECIMAL(5, 2),                     		-- GDP growth rate (%)
     gdp DECIMAL(8, 2),                          		-- GDP per capita

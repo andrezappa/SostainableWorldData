@@ -51,3 +51,6 @@ ALTER TABLE globalSustainableEnergyData_staging
 
 ALTER TABLE globalSustainableEnergyData_staging
 	ALTER COLUMN co2emissions TYPE BIGINT;
+
+ALTER TABLE globalSustainableEnergyData_staging
+	ALTER COLUMN electricityAccess TYPE DECIMAL(5,2);
