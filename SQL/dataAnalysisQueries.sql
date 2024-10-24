@@ -13,7 +13,7 @@ SELECT country, population, density, landArea
 FROM globalCountryData_staging
 ORDER BY density DESC;
 
--- Create a view to calculate GDP per capita and CO2 emissions per capita.
+-- Create a view to calculate GDP per capita and CO2 emissions per capita
 CREATE VIEW CountrySats AS
 	SELECT country, 
 	density, 
@@ -32,19 +32,11 @@ FROM CountrySats
 	WHERE gdpPerCapita IS NOT NULL
 ORDER BY density DESC;
 
--- Analyze the relationship between population density and CO2 emissions per capita for each country
+-- Analyze the relationship between population, density and CO2 emissions per capita for each country
 SELECT country, density, population, co2emissions, emissionsPerCapita
 FROM CountrySats
 	WHERE emissionsPerCapita IS NOT NULL
 ORDER BY density DESC;
-
-SELECT country, population, co2emissions
-FROM globalCountryData_staging
-	WHERE country ='Italy';
-
-SELECT country, co2emissions
-FROM globalSustainableEnergyData_staging
-	WHERE country ='Italy';
 
 -- Rank countries by GDP per capita and compare it with CO2 emissions per capita to identify high-income, low-emission countries
 SELECT country, gdp, gdpPerCapita, co2emissions, emissionsPerCapita
@@ -213,7 +205,7 @@ ORDER BY country, year;
 
 
 
--- Comparative analysis
+-- 3. Comparative analysis
 
 -- Compare CO2 emissions per country in 2023 (using CountryStats view) with 2019
 SELECT 
@@ -249,4 +241,60 @@ WHERE emissions2019 IS NOT NULL
 	AND emissions2023 IS NOT NULL
 ORDER BY percentageChange ASC;
 
+-- Globally evolution of CO2 emissions per person in metric tons (2000 - 2020 and 2023)
+WITH historicalEmissions AS (
+	SELECT 
+	    year, 
+	    SUM(co2emissions) AS totalHistoricalEmissions
+	FROM 
+	    globalSustainableEnergyData_staging
+	GROUP BY 
+	    year
+	HAVING SUM(co2emissions) IS NOT NULL
+	ORDER BY 
+	    year
+),
+emissions2023 AS (
+	SELECT
+		2023 as year,
+	    SUM(co2emissions) AS totalEmissions2023
+	FROM 
+	    globalCountryData_staging
+)
+SELECT * 
+FROM historicalEmissions
+UNION ALL
+SELECT * FROM emissions2023
+ORDER BY year;
 
+-- Compare access to electricity from 2000-2020 and CO2 emissions per capita in 2023
+WITH electricityAccessTrend AS (
+    SELECT 
+        country,  
+        ROUND(AVG(electricityAccess), 2) AS avgElectricityAccess -- avg percentage of population with access to electricity between 2000 and 2020
+    FROM 
+        globalSustainableEnergyData_staging
+    WHERE 
+        year BETWEEN 2000 AND 2020
+		AND electricityAccess IS NOT NULL
+    GROUP BY 
+        country
+),
+co2_2023 AS (
+    SELECT 
+        country, 
+        ROUND(CAST(co2emissions AS numeric) / CAST(population AS numeric), 5) AS CO2PerCapita2023 -- in tons
+    FROM 
+        globalCountryData_staging
+	WHERE co2emissions IS NOT NULL
+)
+SELECT 
+    e.country, 
+    e.avgElectricityAccess, 
+    c.CO2PerCapita2023
+FROM 
+    electricityAccessTrend e
+JOIN 
+    co2_2023 c ON e.country = c.country
+ORDER BY 
+    c.CO2PerCapita2023 DESC;
